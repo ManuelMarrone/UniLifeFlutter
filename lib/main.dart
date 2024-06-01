@@ -1,17 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:unilife_flutter/repository/auth.dart';
+import 'package:unilife_flutter/view/AccessoPage.dart';
 import 'package:unilife_flutter/view/BottomNavigation.dart';
-import 'package:unilife_flutter/view/Home.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 
 //tutto ciò che c'è nel main viene letto all'inizio
-void main() => runApp(UniLife());
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(UniLife());
+}
 class UniLife extends StatelessWidget {
   const UniLife({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const BottomNavigation()
+      home: StreamBuilder(//lo stream builder prende uno stream di dati continuo, al contratio del future che lo prende una volta sola
+      stream: Auth().authStateChanges,
+        builder: (context, snapshot){
+        if(snapshot.hasData){
+          return BottomNavigation();
+        }
+        else
+          {
+            return AccessoPage();
+          }
+        },
+
+      ),
     );
   }
 }

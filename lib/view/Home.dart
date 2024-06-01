@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:unilife_flutter/view/AccessoPage.dart';
+import 'package:unilife_flutter/viewmodel/HomeViewModel.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key:key);
@@ -8,15 +11,32 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  //late HomeViewModel _viewModel;
   @override
   Widget build(BuildContext context) {
+    final homeViewModel = Homeviewmodel();
+
+    //ascolta il cambiamenti nell'autenticazione
+    homeViewModel.authStateChanges.listen((User? user) {
+      if (user == null) {
+        //l'utente si è disconesso
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AccessoPage()),
+        );
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'UniLife',
           textAlign: TextAlign.center,
         ),
+        actions: [
+          IconButton(onPressed: () async{
+            await homeViewModel.disconetti();
+          }, icon: Icon(Icons.logout))
+        ],
       ),
       body: Center(
         child: Column(
