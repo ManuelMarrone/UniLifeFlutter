@@ -114,6 +114,7 @@ class InvitaViewModel extends ChangeNotifier {
 
   void dispose()
   {
+    super.dispose();
     _partecipantiController.close();
   }
 }

@@ -1,14 +1,11 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import '../model/Gruppo.dart';
 
 
 class GruppoRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<String> creaGruppo(Gruppo gruppo) async {
     try {
@@ -63,6 +60,35 @@ class GruppoRepository {
     }
   }
 
+  Future<void> aggiungiElementoLista(String elemento, String idGruppo) async {
+    try {
+      print(idGruppo);
+      DocumentReference docRef = _firestore.collection('gruppi').doc(idGruppo);
+      await docRef.update({
+        "listaSpesa": FieldValue.arrayUnion([elemento])
+      });
+    } catch (e) {
+      throw Exception('Errore durante l\'aggiunta dell\'elemento in lista: $e');
+    }
+  }
+
+  Future<void> eliminaElementoLista(String idGruppo, String elemento) async {
+    DocumentReference gruppoDocRef = _firestore.collection("gruppi").doc(idGruppo);
+
+    await _firestore.runTransaction((transaction) async {
+      DocumentSnapshot gruppoSnapshot = await transaction.get(gruppoDocRef);
+
+      if (gruppoSnapshot.exists) {
+        List<String> lista = List.from(gruppoSnapshot["listaSpesa"]);
+        lista.remove(elemento);
+        transaction.update(gruppoDocRef, {"listaSpesa": lista});
+
+      } else {
+        throw Exception("Il gruppo con ID $idGruppo non esiste.");
+      }
+    });
+  }
+
 
   Future<void> eliminaGruppo(String idGruppo) async {
     try {
@@ -104,5 +130,32 @@ class GruppoRepository {
     }
 
     return partecipantiStreamController.stream;
+  }
+
+
+
+  Future<Stream<List<String>>> getListaSpesa(String gruppoId) async {
+    final listaStreamController = StreamController<List<String>>();
+    final DocumentReference gruppoDocRef = FirebaseFirestore.instance.collection('gruppi').doc(gruppoId);
+
+    try {
+      final DocumentSnapshot gruppoDocSnapshot = await gruppoDocRef.get();
+      if (gruppoDocSnapshot.exists) {
+        final Map<String, dynamic>? data = gruppoDocSnapshot.data() as Map<String, dynamic>?;
+
+        if (data != null && data['listaSpesa'] != null) {
+          final List<String> elementi = List<String>.from(data['listaSpesa'] as List<dynamic>);
+          listaStreamController.add(elementi);
+        } else {
+          throw Exception('Il campo "listaSpesa" non è presente nel documento o è null');
+        }
+      } else {
+        throw Exception('Il documento del gruppo non esiste');
+      }
+    } catch (e) {
+      listaStreamController.addError(e);
+    }
+
+    return listaStreamController.stream;
   }
 }

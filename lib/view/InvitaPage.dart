@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:provider/provider.dart';
 import 'package:unilife_flutter/provider/gruppo.dart';
-import 'package:unilife_flutter/repository/UtenteRepository.dart';
 import '../viewmodel/InvitaViewModel.dart';
 
 class Invitapage extends StatefulWidget {
@@ -15,13 +13,7 @@ class Invitapage extends StatefulWidget {
 class _InvitapageState extends State<Invitapage> {
   TextEditingController _emailController = TextEditingController();
 
-  late InvitaViewModel _viewModel;
-
-  @override
-  void initState() {
-    super.initState();
-    _viewModel = InvitaViewModel();
-  }
+  final InvitaViewModel _viewModel = InvitaViewModel();
 
   @override
   Widget build(BuildContext context) {

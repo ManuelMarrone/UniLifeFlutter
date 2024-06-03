@@ -14,6 +14,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   TextEditingController _codiceController = TextEditingController();
+  TextEditingController _elementoListaController = TextEditingController();
   late HomeViewModel _viewModel;
 
   @override
@@ -27,7 +28,7 @@ class _HomeState extends State<Home> {
     bool isGruppo = await _viewModel.controllaIdGruppo();
     context.read<GruppoListener>().setHasGruppo(isGruppo);
     if (context.read<GruppoListener>().hasGruppo) {
-      /// fetch della lista della spesa
+      _viewModel.fetchListaSpesa();
     }
   }
 
@@ -70,28 +71,56 @@ class _HomeState extends State<Home> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const TextField(
+          TextField(
+            controller: _elementoListaController,
             decoration: InputDecoration(
               hintText: 'elemento da comprare',
             ),
           ),
           ElevatedButton(
             onPressed: () {
-              // Aggiungi l'azione del pulsante "Aggiungi" qui
+              //aggiunta dell'elemento alla lista
+              String elemento = _elementoListaController.text;
+              if (elemento.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Inserisci qualcosa da comprare')),
+                );
+              } else {
+                _viewModel.aggiungiElementoLista(elemento);
+                _elementoListaController.clear();
+                FocusScope.of(context).unfocus();
+              }
             },
             child: Text('Aggiungi'),
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 10, // Numero di elementi nella lista
-              itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  title: Text('Elemento $index'),
-                  // Aggiungi altre proprietà o azioni per gli elementi della lista
+          Flexible(
+          child: StreamBuilder<List<String>>(
+            stream: _viewModel.listaSpesa,
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                final lista = snapshot.data!;
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: lista.length,
+                  itemBuilder: (context, index) {
+                    final elemento = lista[index];
+                    return ListTile(
+                      title: Text(elemento),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () async {
+                          _viewModel.eliminaElementoLista(elemento);
+
+                        },
+                      ),
+                    );
+                  },
                 );
-              },
-            ),
-          ),
+              } else {
+                return Center(child: Text('Non c\'è niente da comprare'));
+              }
+            },
+          )),
         ],
       ),
     );
@@ -147,6 +176,7 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     _codiceController.dispose();
+    _elementoListaController.dispose();
     super.dispose();
   }
 }
