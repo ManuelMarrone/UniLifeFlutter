@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:provider/provider.dart';
+import 'package:unilife_flutter/provider/gruppo.dart';
 import 'package:unilife_flutter/repository/UtenteRepository.dart';
 import '../viewmodel/InvitaViewModel.dart';
 
@@ -14,26 +16,11 @@ class _InvitapageState extends State<Invitapage> {
   TextEditingController _emailController = TextEditingController();
 
   late InvitaViewModel _viewModel;
-  bool _hasGroup = false;
 
   @override
   void initState() {
     super.initState();
     _viewModel = InvitaViewModel();
-    _viewModel.caricaIdGruppo();
-    _viewModel.addListener(_onViewModelChanged);
-    if (_hasGroup)
-      {
-        _viewModel.fetchPartecipanti();
-        print("ViewModel changed: ${_viewModel.idGruppo}");
-      }
-  }
-
-  void _onViewModelChanged() {
-    _viewModel.fetchPartecipanti();
-    setState(() {
-      _hasGroup = _viewModel.idGruppo != null;
-    });
   }
 
   @override
@@ -52,16 +39,13 @@ class _InvitapageState extends State<Invitapage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: 20),
-            if (!_hasGroup) ...[
+            if (!context.watch<GruppoListener>().hasGruppo) ...[
               Center(
                 child: ElevatedButton(
                   onPressed: () {
                     //creazione del gruppo con l'utente
                     _viewModel.creaGruppo();
-                    setState(() {
-                      _hasGroup = true;
-                    });
-                    _viewModel.fetchPartecipanti();
+                    context.read<GruppoListener>().setHasGruppo(true);
                   },
                   child: const Text('Crea gruppo'),
                 ),
@@ -86,9 +70,14 @@ class _InvitapageState extends State<Invitapage> {
                           title: Text(partecipante),
                           trailing: IconButton(
                             icon: const Icon(Icons.delete),
-                            onPressed: () {
+                            onPressed: () async {
                               _viewModel.eliminaPartecipante(partecipante);
-                              _viewModel.fetchPartecipanti();
+
+                              //se l'utente si sta togliendo da solo da l gruppo cambio lo stato
+                              if (await _viewModel.checkUsername(partecipante))
+                                {
+                                  context.read<GruppoListener>().setHasGruppo(false);
+                                }
                             },
                           ),
                         );
@@ -107,7 +96,7 @@ class _InvitapageState extends State<Invitapage> {
               SizedBox(height: 10),
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: "Email",
                   border: OutlineInputBorder(),
                 ),
@@ -142,7 +131,6 @@ class _InvitapageState extends State<Invitapage> {
   @override
   void dispose() {
     _emailController.dispose();
-    _viewModel.removeListener(_onViewModelChanged);
     super.dispose();
   }
 }

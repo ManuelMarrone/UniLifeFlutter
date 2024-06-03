@@ -19,6 +19,17 @@ class GruppoRepository {
     }
   }
 
+  Future<DocumentSnapshot> getGruppo(String idGruppo) async {
+    try {
+      DocumentReference docRef = _firestore.collection('gruppi').doc(idGruppo);
+      DocumentSnapshot docSnapshot = await docRef.get();
+      return docSnapshot;
+    } catch (e) {
+      throw Exception('Errore durante il recupero del gruppo: $e');
+    }
+  }
+
+
   Future<void> eliminaPartecipante(String idGruppo, String username) async {
     DocumentReference gruppoDocRef = _firestore.collection("gruppi").doc(idGruppo);
 
@@ -39,8 +50,20 @@ class GruppoRepository {
         throw Exception("Il gruppo con ID $idGruppo non esiste.");
       }
     });
-
   }
+
+  Future<void> aggiungiPartecipante(String username, String idGruppo) async {
+    try {
+      DocumentReference docRef = _firestore.collection('gruppi').doc(idGruppo);
+      await docRef.update({
+        "partecipanti": FieldValue.arrayUnion([username])
+      });
+    } catch (e) {
+      throw Exception('Errore durante l\'aggiunta del partecipante: $e');
+    }
+  }
+
+
   Future<void> eliminaGruppo(String idGruppo) async {
     try {
       await _firestore.collection('gruppi').doc(idGruppo).delete();

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:unilife_flutter/provider/gruppo.dart';
 import 'package:unilife_flutter/repository/auth.dart';
 import 'package:unilife_flutter/view/AccessoPage.dart';
 import 'package:unilife_flutter/view/BottomNavigation.dart';
@@ -12,7 +14,10 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(UniLife());
+  ///tutto i widget sotto l'app possono accedere al provider
+  runApp(MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => GruppoListener()) ],
+      child:UniLife()));
 }
 class UniLife extends StatelessWidget {
   const UniLife({Key? key}) : super(key: key);

@@ -13,11 +13,28 @@ class InvitaViewModel extends ChangeNotifier {
   final UtenteRepository _utenteRepo = UtenteRepository();
   final GruppoRepository _gruppoRepo = GruppoRepository();
   String? _idGruppo;
-  String? get idGruppo => _idGruppo;
 
   final StreamController<List<String>> _partecipantiController = StreamController<List<String>>();
 
   Stream<List<String>> get partecipanti => _partecipantiController.stream;
+
+  InvitaViewModel()
+  {
+    caricaIdGruppo();
+  }
+
+  Future<bool> checkUsername(String username)
+  async {
+    String? currentUser = await _utenteRepo.getCurrentUsername();
+    if (currentUser == username)
+      {
+        return true;
+      }
+    else
+      {
+        return false;
+      }
+  }
 
   void fetchPartecipanti() async {
     final partecipantiStream = await _gruppoRepo.getPartecipanti(_idGruppo!);
@@ -63,7 +80,10 @@ class InvitaViewModel extends ChangeNotifier {
 
   Future<void> caricaIdGruppo() async {
     _idGruppo = await _utenteRepo.getUserGroupId();
-    notifyListeners();
+    if (_idGruppo != null)
+      {
+        fetchPartecipanti();
+      }
   }
 
 
@@ -80,6 +100,7 @@ class InvitaViewModel extends ChangeNotifier {
         _idGruppo = await _gruppoRepo.creaGruppo(nuovoGruppo);
         if (_idGruppo != null) {
           await _utenteRepo.setIdGruppo(_idGruppo!);
+          fetchPartecipanti();
         } else {
           throw Exception('Errore nella creazione del gruppo: ID gruppo nullo');
         }
