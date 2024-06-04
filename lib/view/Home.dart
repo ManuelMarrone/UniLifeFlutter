@@ -47,6 +47,7 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFF03C9A9),
         title: const Text(
           'UniLife',
           textAlign: TextAlign.center,
@@ -60,71 +61,89 @@ class _HomeState extends State<Home> {
           )
         ],
       ),
-      body: context.watch<GruppoListener>().hasGruppo
-          ? _buildHasGruppoWidget()
-          : _buildNoGruppoWidget(),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF03C9A9), Color(0xFF16A085)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+
+          ),
+        ),
+        child: context.watch<GruppoListener>().hasGruppo
+            ? _buildHasGruppoWidget()
+            : _buildNoGruppoWidget(),
+      ),
     );
   }
+
 
   Widget _buildHasGruppoWidget() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          TextField(
-            controller: _elementoListaController,
-            decoration: InputDecoration(
-              hintText: 'elemento da comprare',
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _elementoListaController,
+                  decoration: InputDecoration(
+                    hintText: 'elemento da comprare',
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  //aggiunta dell'elemento alla lista
+                  String elemento = _elementoListaController.text;
+                  if (elemento.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Inserisci qualcosa da comprare')),
+                    );
+                  } else {
+                    _viewModel.aggiungiElementoLista(elemento);
+                    _elementoListaController.clear();
+                    FocusScope.of(context).unfocus();
+                  }
+                },
+                child: Text('Aggiungi'),
+              ),
+            ],
+          ),
+          SizedBox(height: 10), // Aggiungi spazio tra il Row e la ListView
+          Expanded(
+            child: StreamBuilder<List<String>>(
+              stream: _viewModel.listaSpesa,
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  final lista = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: lista.length,
+                    itemBuilder: (context, index) {
+                      final elemento = lista[index];
+                      return ListTile(
+                        title: Text(elemento),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () async {
+                            _viewModel.eliminaElementoLista(elemento);
+                          },
+                        ),
+                      );
+                    },
+                  );
+                } else {
+                  return Center(child: Text('Non c\'è niente da comprare'));
+                }
+              },
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              //aggiunta dell'elemento alla lista
-              String elemento = _elementoListaController.text;
-              if (elemento.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Inserisci qualcosa da comprare')),
-                );
-              } else {
-                _viewModel.aggiungiElementoLista(elemento);
-                _elementoListaController.clear();
-                FocusScope.of(context).unfocus();
-              }
-            },
-            child: Text('Aggiungi'),
-          ),
-          Flexible(
-          child: StreamBuilder<List<String>>(
-            stream: _viewModel.listaSpesa,
-            builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                final lista = snapshot.data!;
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: lista.length,
-                  itemBuilder: (context, index) {
-                    final elemento = lista[index];
-                    return ListTile(
-                      title: Text(elemento),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async {
-                          _viewModel.eliminaElementoLista(elemento);
-
-                        },
-                      ),
-                    );
-                  },
-                );
-              } else {
-                return Center(child: Text('Non c\'è niente da comprare'));
-              }
-            },
-          )),
         ],
       ),
     );
   }
+
 
   Widget _buildNoGruppoWidget() {
     return Center(

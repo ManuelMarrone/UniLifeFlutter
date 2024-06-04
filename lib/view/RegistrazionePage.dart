@@ -20,88 +20,118 @@ class _RegistrazionepageState extends State<Registrazionepage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registrazione'),
+        backgroundColor: Color(0xFF00629E),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _username,
-              decoration: InputDecoration(label: Text('username')),
-            ),
-            TextField(
-              controller: _email,
-              decoration: InputDecoration(label: Text('email')),
-            ),
-            TextField(
-              controller: _password,
-              obscureText: true,
-              decoration: InputDecoration(label: Text('password')),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                String? usernameError = registrazioneViewModel.validateUsername(_username.text);
-                String? emailError = registrazioneViewModel.validateEmail(_email.text);
-                String? passwordError = registrazioneViewModel.validatePassword(_password.text);
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF03C9A9), Color(0xFF16A085)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextField(
+                controller: _username,
+                decoration: InputDecoration(
+                  labelText: 'username',
+                ),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _email,
+                decoration: InputDecoration(
+                  labelText: 'email',
+                ),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _password,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'password',
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  String? usernameError = registrazioneViewModel.validateUsername(_username.text);
+                  String? emailError = registrazioneViewModel.validateEmail(_email.text);
+                  String? passwordError = registrazioneViewModel.validatePassword(_password.text);
 
-                bool usernameUnique = await registrazioneViewModel.isUsernameUnique(_username.text);
-                bool emailUnique = await registrazioneViewModel.isEmailUnique(_email.text);
+                  bool usernameUnique = await registrazioneViewModel.isUsernameUnique(_username.text);
+                  bool emailUnique = await registrazioneViewModel.isEmailUnique(_email.text);
 
+                  if (!usernameUnique) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Username già esistente")),
+                    );
+                    return;
+                  }
+                  if (!emailUnique) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Email già esistente")),
+                    );
+                    return;
+                  }
 
-                if (!usernameUnique) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Username già esistente")),
+                  if (usernameError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(usernameError)),
+                    );
+                    return;
+                  }
+
+                  if (emailError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(emailError)),
+                    );
+                    return;
+                  }
+
+                  if (passwordError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(passwordError)),
+                    );
+                    return;
+                  }
+
+                  // Tutti i campi sono corretti, procedi con la registrazione
+                  registrazioneViewModel.registra(
+                    _email.text,
+                    _password.text,
+                    _username.text,
                   );
-                  return;
-                }
-                if (!emailUnique) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Email già esistente")),
-                  );
-                  return;
-                }
 
-                if (usernameError != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(usernameError)),
-                  );
-                  return;
-                }
-
-                if (emailError != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(emailError)),
-                  );
-                  return;
-                }
-
-                if (passwordError != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(passwordError)),
-                  );
-                  return;
-                }
-
-                // Tutti i campi sono corretti, procedi con la registrazione
-                registrazioneViewModel.registra(
-                  _email.text,
-                  _password.text,
-                  _username.text,
-                );
-
-                if (await registrazioneViewModel.result) {
+                  if (await registrazioneViewModel.result) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => AccessoPage()),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Registrazione fallita')),
+                    );
+                  }
+                },
+                child: Text('Registrati'),
+              ),
+              TextButton(
+                onPressed: () {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => AccessoPage()),
                   );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Registrazione fallito')),
-                  );                }
-              },
-              child: Text('Registrati'),
-            ),
-          ],
+                },
+                child: Text('Già sei registrato? Accedi'),
+              ),
+            ],
+          ),
         ),
       ),
     );

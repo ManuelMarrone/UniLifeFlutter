@@ -13,6 +13,4 @@ class Accessoviewmodel with ChangeNotifier{
     notifyListeners();
   }
 
-
-
 }
