@@ -20,12 +20,4 @@ class Utente{
     };
   }
 
-  static Utente fromMap(Map<String, dynamic> map) {
-    return Utente(
-      id_gruppo: map['id_gruppo'],
-      username: map['username'],
-      email: map['email'],
-      password: map['password'],
-    );
-  }
 }

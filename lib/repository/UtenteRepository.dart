@@ -99,7 +99,6 @@ class UtenteRepository {
           return false;
         }
     } catch (e) {
-      print('Errore durante la registrazione: $e');
       return false;
     }
   }
@@ -109,7 +108,6 @@ class UtenteRepository {
       QuerySnapshot querySnapshot = await _firestore.collection('utenti').where('email', isEqualTo: email).get();
       return querySnapshot.docs.isEmpty;
     } catch (e) {
-      print('Errore durante il controllo dell\'univocità dell\'email: $e');
       return false;
     }
   }
@@ -119,7 +117,6 @@ class UtenteRepository {
       QuerySnapshot querySnapshot = await _firestore.collection('utenti').where('username', isEqualTo: username).get();
       return querySnapshot.docs.isEmpty;
     } catch (e) {
-      print('Errore durante il controllo dell\'univocità dello username: $e');
       return false;
     }
   }

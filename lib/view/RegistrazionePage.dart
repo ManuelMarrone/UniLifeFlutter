@@ -101,7 +101,7 @@ class _RegistrazionepageState extends State<Registrazionepage> {
                     return;
                   }
 
-                  // Tutti i campi sono corretti, procedi con la registrazione
+                  //tutti i campi sono corretti, procedi con la registrazione
                   registrazioneViewModel.registra(
                     _email.text,
                     _password.text,
@@ -135,5 +135,13 @@ class _RegistrazionepageState extends State<Registrazionepage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _username.dispose();
+    _password.dispose();
+    super.dispose();
   }
 }

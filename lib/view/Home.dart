@@ -111,7 +111,7 @@ class _HomeState extends State<Home> {
               ),
             ],
           ),
-          SizedBox(height: 10), // Aggiungi spazio tra il Row e la ListView
+          SizedBox(height: 10),
           Expanded(
             child: StreamBuilder<List<String>>(
               stream: _viewModel.listaSpesa,

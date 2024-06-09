@@ -36,7 +36,7 @@ class HomeViewModel with ChangeNotifier{
       fetchListaSpesa();
     } catch (e) {
       // Gestisci eventuali errori
-      print('Errore durante l\'eliminazione dell\'elemento in lista: $e');
+      throw Exception('Errore durante l\'eliminazione dell\'elemento in lista: $e');
     }
   }
 
@@ -47,7 +47,7 @@ class HomeViewModel with ChangeNotifier{
       fetchListaSpesa();
     } catch (e) {
       // Gestisci eventuali errori
-      print('Errore durante l\'aggiunta dell\'elemento in lista: $e');
+      throw Exception('Errore durante l\'aggiunta dell\'elemento in lista: $e');
     }
   }
 
@@ -74,10 +74,8 @@ class HomeViewModel with ChangeNotifier{
     try
         {
           var gruppo = await _gruppoRepo.getGruppo(codice);
-          print("gruppo ${codice}");
           if(gruppo.exists)
             {
-              print("gruppo esiste");
               String? username = await _utenteRepo.getCurrentUsername();
               if(username != null)
                 {

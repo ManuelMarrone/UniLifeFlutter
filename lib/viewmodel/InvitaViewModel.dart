@@ -47,7 +47,7 @@ class InvitaViewModel extends ChangeNotifier {
   async {
     final Email emailObject = Email(
       body: 'Sei stato invitato al gruppo di coinquilini, registrati all\'app se non l\'hai '
-          'ancora fatto e inserisci il codice: ${_idGruppo}',
+          'ancora fatto e inserisci il codice: $_idGruppo',
       subject: 'Invito al gruppo di coinquilini',
       recipients: [email],
       isHTML: false,
@@ -55,9 +55,8 @@ class InvitaViewModel extends ChangeNotifier {
 
     try {
       await FlutterEmailSender.send(emailObject);
-      print('Email inviata con successo');
     } catch (error) {
-      print('Errore durante l\'invio dell\'email: $error');
+      throw Exception('Errore durante l\'invio dell\'email: $error');
     }
   }
 
@@ -70,11 +69,11 @@ class InvitaViewModel extends ChangeNotifier {
     try {
       await _utenteRepo.eliminaIdGruppo(username);
       await _gruppoRepo.eliminaPartecipante(_idGruppo!, username);
-      // Aggiorna lo stream dei partecipanti
+      //aggiorna lo stream dei partecipanti
       fetchPartecipanti();
     } catch (e) {
-      // Gestisci eventuali errori
-      print('Errore durante l\'eliminazione del partecipante: $e');
+      //gestisci errori
+      throw Exception('Errore durante l\'eliminazione del partecipante: $e');
       }
   }
 
@@ -95,7 +94,6 @@ class InvitaViewModel extends ChangeNotifier {
           partecipanti: [username],
           listaSpesa: [],
           contatti: {},
-          documenti: {},
         );
         _idGruppo = await _gruppoRepo.creaGruppo(nuovoGruppo);
         if (_idGruppo != null) {

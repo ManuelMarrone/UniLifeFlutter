@@ -62,7 +62,6 @@ class GruppoRepository {
 
   Future<void> aggiungiElementoLista(String elemento, String idGruppo) async {
     try {
-      print(idGruppo);
       DocumentReference docRef = _firestore.collection('gruppi').doc(idGruppo);
       await docRef.update({
         "listaSpesa": FieldValue.arrayUnion([elemento])

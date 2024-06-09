@@ -83,4 +83,10 @@ class _AccessoPageState extends State<AccessoPage> {
       ),
     );
   }
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
 }
